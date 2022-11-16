@@ -1,7 +1,7 @@
 <?php
 
 function getBooks($connect){
-    $books = mysqli_query($connect,"SELECT * FROM `book`");
+    $books = mysqli_query($connect,"SELECT * FROM `book`,`author`");
     $booklist = [];
 
     while($book = mysqli_fetch_assoc($books)){
