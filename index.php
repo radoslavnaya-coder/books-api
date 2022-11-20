@@ -30,4 +30,19 @@ if($method === 'GET'){
     elseif($type === genre){
         getGenrename($connect);
     }
+    elseif($type === author){
+        getAuthors($connect);
+    }
+}
+elseif($method === 'POST'){
+    if($type === 'books'){
+        addBook($connect, $_POST);
+    }
+}
+elseif($method === 'DELETE'){
+    if($type === 'books'){
+        if(isset($book_id)){
+            deleteBook($connect, $book_id);
+        }
+    }
 }
