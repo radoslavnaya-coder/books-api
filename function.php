@@ -1,7 +1,9 @@
 <?php
 
 function getBooks($connect){
-    $books = mysqli_query($connect,"SELECT * FROM `book`,`author`");
+    $books = mysqli_query($connect,"SELECT * FROM `book` 
+    INNER JOIN `author` 
+    ON `book`.`author_id` = `author`.`author_id` ");
     $booklist = [];
 
     while($book = mysqli_fetch_assoc($books)){
@@ -44,8 +46,14 @@ function getAuthors($connect){
     echo json_encode($authorList);
 }
 
-function addBook($connect, $data){
-    $image = $data['book_img'];
+function addBook($connect, $data, $file){
+
+    $ex = pathinfo($file['bookimage']['name'], PATHINFO_EXTENSION);
+    $filename = uniqid().".".$ex;
+    move_uploaded_file($file['bookimage']['tmp_name'], "../books/uploads/".$filename);
+    $filename = 'uploads/'.$filename;
+
+    // $image = $data['book_img'];
     $name = $data['book_name'];
     $author = $data['author_id'];
     $script = $data['book_script'];
@@ -53,7 +61,7 @@ function addBook($connect, $data){
     $genre = $data['book_genre_id'];
 
     mysqli_query($connect, "INSERT INTO `book` (`book_id`, `book_img`, `book_name`, `author_id`, `book_script`, `book_year`, `book_genre_id`) 
-    VALUES (NULL, '$image', '$name', '$author', '$script', '$year', '$genre') ");
+    VALUES (NULL, '$filename', '$name', '$author', '$script', '$year', '$genre') ");
 
     http_response_code(201);
     $mes = [
@@ -70,4 +78,24 @@ function deleteBook($connect, $book_id){
         "message" => "Книга удалена"
     ];
     echo json_encode($mes);
+}
+
+function updateBook($connect, $book_id, $data, $file){
+    $image = $file['book_img'];
+    $name = $data['book_name'];
+    $author = $data['author_id'];
+    $script = $data['book_script'];
+    $year = $data['book_year'];
+    $genre = $data['book_genre_id'];
+
+    mysqli_query($connect, "UPDATE `book` SET `book_img`='$image',
+    `book_name`='$name',`author_id`='$author',`book_script`='$script',`book_year`='$year',`book_genre_id`='$genre' 
+    WHERE `book`.`book_id` = '$book_id'");
+
+    http_response_code(200);
+    $res = [
+        "status" => true,
+        "book_id" => "Book update"
+    ];
+    echo json_encode($res);
 }
