@@ -36,22 +36,18 @@ if($method === 'GET'){
 }
 elseif($method === 'POST'){
     if($type === 'books'){
-        addBook($connect, $_POST, $_FILES);
+        if(isset($book_id)){
+            updateBook($connect, $book_id, $data, $_POST, $_FILES);
+        }
+        else{
+            addBook($connect, $_POST, $_FILES);
+        }
     }
 }
 elseif($method === 'DELETE'){
     if($type === 'books'){
         if(isset($book_id)){
             deleteBook($connect, $book_id);
-        }
-    }
-}
-elseif($method === 'PATCH'){
-    if($type === 'books'){
-        if(isset($book_id)){
-            $data = file_get_contents('php://input');
-            $data = json_decode($data, true);
-            updateBook($connect, $book_id, $data, $_FILES);
         }
     }
 }
