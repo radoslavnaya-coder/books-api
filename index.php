@@ -27,17 +27,23 @@ if($method === 'GET'){
             getBooks($connect);
         }
     }
-    elseif($type === genre){
-        getGenrename($connect);
+    elseif($type === 'genre'){
+        if(isset($book_id)){
+            getGenresname($connect, $book_id);
+        }
+        else{
+            getGenrename($connect);  
+        }
+        
     }
-    elseif($type === author){
+    elseif($type === 'author'){
         getAuthors($connect);
     }
 }
 elseif($method === 'POST'){
     if($type === 'books'){
         if(isset($book_id)){
-            updateBook($connect, $book_id, $data, $_POST, $_FILES);
+            updateBook($connect, $book_id, $_POST, $_FILES);
         }
         else{
             addBook($connect, $_POST, $_FILES);
