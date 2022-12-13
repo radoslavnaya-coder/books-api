@@ -148,6 +148,7 @@ function addBook($connect, $data, $file){
 function deleteBook($connect, $book_id){
     mysqli_query($connect, "DELETE FROM `book` WHERE `book`.`book_id` = '$book_id'");
     mysqli_query($connect, "DELETE FROM `booksauthor` WHERE `booksauthor`.`book_id` = '$book_id'");
+    mysqli_query($connect, "DELETE FROM `booksgenres` WHERE `booksgenres`.`book_id` = '$book_id'");
     $mes = [
         "status" => true,
         "message" => "Книга удалена"
