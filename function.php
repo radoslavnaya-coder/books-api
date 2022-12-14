@@ -136,11 +136,11 @@ function addBook($connect, $data, $file){
     $script = $data['book_script'];
     $year = $data['book_year'];
     $genre = $data['book_genre_id'];
-    $id = mysqli_insert_id($connect);
 
-    mysqli_query($connect, "INSERT INTO `book` (`book_img`, `book_name`, `book_script`, `book_year`) 
-    VALUES ( '$filename', '$name', '$script', '$year')");
+    mysqli_query($connect, "INSERT INTO `book` (`book_id`, `book_name`, `book_img`, `book_script`, `book_year`) 
+    VALUES (NULL, '$name', '$filename', '$script', '$year')");
     mysqli_query($connect, "INSERT INTO `author` (`author_id`) VALUES ('$author')");
+    $id = mysqli_insert_id($connect);
     mysqli_query($connect, "INSERT INTO `booksauthor` (`id`, `book_id`, `author_id`) VALUES (NULL, '$id', '$author') ");
     mysqli_query($connect, "INSERT INTO `booksgenres` (`id`, `book_id`, `book_genre_id`) VALUES (NULL, '$id', '$genre') ");
     mysqli_query($connect, "INSERT INTO `genre` (`book_genre_id`) VALUES ('$genre')");
