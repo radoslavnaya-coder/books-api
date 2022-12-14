@@ -44,25 +44,28 @@ function getBook($connect, $book_id){
 }
 
 function getGenrename($connect){
-    $genres = mysqli_query($connect, "SELECT DISTINCT
-    `book`.`book_id` AS 'book_id',
-    `book`.`book_name` AS 'book_name',
-    `book`.`book_img` AS 'book_img',
-    `book`.`book_year` AS 'book_year',
-    (SELECT GROUP_CONCAT(`author`.`author_name` separator ', ') FROM `author`, `booksauthor` 
-     where `author`.`author_id` = `booksauthor`.`author_id`
-     and `booksauthor`.`book_id` = `book`.`book_id`)
-     as 'author_namer',
-     (SELECT GROUP_CONCAT(`booksgenres`.`book_genre_id` separator ', ') FROM `genre`, `booksgenres` 
-     where `genre`.`book_genre_id` = `booksgenres`.`book_genre_id`
-     and `booksgenres`.`book_id` = `book`.`book_id`)
-     as 'book_genre_id',
-     (SELECT GROUP_CONCAT(`genre`.`genre_name` separator ', ') FROM `genre`, `booksgenres` 
-     where `genre`.`book_genre_id` = `booksgenres`.`book_genre_id`
-     and `booksgenres`.`book_id` = `book`.`book_id`)
-     as 'genre_name'
+    $genres = mysqli_query($connect, "
+    SELECT * FROM `genre`
+    ");
+    // $genres = mysqli_query($connect, "SELECT DISTINCT
+    // `book`.`book_id` AS 'book_id',
+    // `book`.`book_name` AS 'book_name',
+    // `book`.`book_img` AS 'book_img',
+    // `book`.`book_year` AS 'book_year',
+    // (SELECT GROUP_CONCAT(`author`.`author_name` separator ', ') FROM `author`, `booksauthor` 
+    //  where `author`.`author_id` = `booksauthor`.`author_id`
+    //  and `booksauthor`.`book_id` = `book`.`book_id`)
+    //  as 'author_namer',
+    //  (SELECT GROUP_CONCAT(`booksgenres`.`book_genre_id` separator ', ') FROM `genre`, `booksgenres` 
+    //  where `genre`.`book_genre_id` = `booksgenres`.`book_genre_id`
+    //  and `booksgenres`.`book_id` = `book`.`book_id`)
+    //  as 'book_genre_id',
+    //  (SELECT GROUP_CONCAT(`genre`.`genre_name` separator ', ') FROM `genre`, `booksgenres` 
+    //  where `genre`.`book_genre_id` = `booksgenres`.`book_genre_id`
+    //  and `booksgenres`.`book_id` = `book`.`book_id`)
+    //  as 'genre_name'
 
-    FROM `book`");
+    // FROM `book`");
     
     $genrelist = [];
 
@@ -70,38 +73,42 @@ function getGenrename($connect){
         $genrelist[] = $genre;
     }
 
-// SELECT DISTINCT * FROM `genre`,`book`,`author`
-//     WHERE `book`.`book_genre_id` = `genre`.`book_genre_id`
     echo json_encode($genrelist);
 }
-function getGenresname($connect, $book_id){
-    $book = mysqli_query($connect, "SELECT DISTINCT
+function getGenresname($connect, $book_genre_id){
+    $genres = mysqli_query($connect, "SELECT DISTINCT
     `book`.`book_id` AS 'book_id',
     `book`.`book_name` AS 'book_name',
     `genre`.`genre_name` AS 'genre_name',
     `genre`.`book_genre_id` AS 'book_genre_id',
     `book`.`book_img` AS 'book_img',
     `book`.`book_year` AS 'book_year',
+
     (SELECT GROUP_CONCAT(`author`.`author_name` separator ', ') FROM `author`, `booksauthor` 
-     where `author`.`author_id` = `booksauthor`.`author_id`
-     and `booksauthor`.`book_id` = `book`.`book_id`)
-     as 'author_namer',
-     (SELECT GROUP_CONCAT(`booksgenres`.`book_genre_id` separator ', ') FROM `genre`, `booksgenres` 
-     where `genre`.`book_genre_id` = `booksgenres`.`book_genre_id`
-     and `booksgenres`.`book_id` = `book`.`book_id`)
-     as 'book_genre_id',
-     (SELECT GROUP_CONCAT(`genre`.`genre_name` separator ', ') FROM `genre`, `booksgenres` 
-     where `genre`.`book_genre_id` = `booksgenres`.`book_genre_id`
-     and `booksgenres`.`book_id` = `book`.`book_id`)
-     as 'genre_name'
+     WHERE `author`.`author_id` = `booksauthor`.`author_id`
+     AND `booksauthor`.`book_id` = `book`.`book_id`)
+     AS 'author_namer'
     
-    FROM `book`,`genre` WHERE `book`.`book_id`= $book_id");
-    if(mysqli_num_rows($book) === 0){
+    FROM `book`,`genre`,`booksgenres`
+    
+    WHERE `genre`.`book_genre_id`= `booksgenres`.`book_genre_id` 
+    AND `booksgenres`.`book_id` = `book`.`book_id` 
+    AND `genre`.`book_genre_id` = '$book_genre_id'");
+    
+    if(mysqli_num_rows($genres) === 0){
         http_response_code(404);
+        $res = [
+            "status" => false,
+            "message" => "Books not found"
+        ];
+        echo json_encode($res);
     }
     else{
-        $book = mysqli_fetch_assoc($book);
-        echo json_encode($book);
+        $genreList = [];
+        while($genre = mysqli_fetch_assoc($genres)){
+            $genreList[] = $genre;
+        }
+        echo json_encode($genreList);
     }
 }
 function getAuthors($connect){
@@ -157,14 +164,19 @@ function deleteBook($connect, $book_id){
 }
 
 function updateBook($connect, $book_id, $data, $file){
-    $image = $file['book_img'];
+   
+   $ex = pathinfo($file['bookimage']['name'], PATHINFO_EXTENSION);
+    $filename = uniqid().".".$ex;
+    move_uploaded_file($file['bookimage']['tmp_name'], "../books/uploads/".$filename);
+    $filename = 'uploads/'.$filename;
+   
     $name = $data['book_name'];
     $author = $data['author_id'];
     $script = $data['book_script'];
     $year = $data['book_year'];
     $genre = $data['book_genre_id'];
 
-    mysqli_query($connect, "UPDATE `book` SET `book_img`='$image',
+    mysqli_query($connect, "UPDATE `book` SET `book_img`='$filename',
     `book_name`='$name',`book_script`='$script',`book_year`='$year'
     WHERE `book`.`book_id` = '$book_id'");
     mysqli_query($connect, "UPDATE `author` SET `author_id` = '$author' WHERE `author`.`author_id` = '$author' ");

@@ -16,6 +16,7 @@ $params = explode('/',$short);
 $type = $params[0];
 if(isset($params[1])){
     $book_id = $params[1];
+    $book_genre_id = $params[1];
 }
 
 if($method === 'GET'){
@@ -28,8 +29,8 @@ if($method === 'GET'){
         }
     }
     elseif($type === 'genre'){
-        if(isset($book_id)){
-            getGenresname($connect, $book_id);
+        if(isset($book_genre_id)){
+            getGenresname($connect, $book_genre_id);
         }
         else{
             getGenrename($connect);  
