@@ -165,7 +165,7 @@ function deleteBook($connect, $book_id){
 
 function updateBook($connect, $book_id, $data, $file){
    
-   $ex = pathinfo($file['bookimage']['name'], PATHINFO_EXTENSION);
+    $ex = pathinfo($file['bookimage']['name'], PATHINFO_EXTENSION);
     $filename = uniqid().".".$ex;
     move_uploaded_file($file['bookimage']['tmp_name'], "../books/uploads/".$filename);
     $filename = 'uploads/'.$filename;
@@ -182,6 +182,7 @@ function updateBook($connect, $book_id, $data, $file){
     mysqli_query($connect, "UPDATE `author` SET `author_id` = '$author' WHERE `author`.`author_id` = '$author' ");
     mysqli_query($connect, "UPDATE `booksauthor` SET `book_id` = '$book_id', `author_id` = '$author' WHERE `booksauthor`.`book_id` = '$book_id' ");
     mysqli_query($connect, "UPDATE `booksgenres` SET `book_id` = '$book_id', `book_genre_id` = '$genre' WHERE `booksgenres`.`book_id` = '$book_id' ");
+    mysqli_query($connect, "UPDATE `genre` SET `book_genre_id` = '$genre' WHERE `genre`.`book_genre_id` = '$genre'");
 
     http_response_code(200);
     $res = [
